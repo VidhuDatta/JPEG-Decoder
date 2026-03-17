@@ -1,0 +1,55 @@
+# List of all Verilog source files to include in this build.
+# Used by both synthesis and RTL simulation.
+synthesis.inputs.input_files: [
+  "sv/jpeg_core.sv",
+  "sv/jpeg_bitbuffer.sv",
+  "sv/jpeg_dht_std_cx_ac.sv",
+  "sv/jpeg_dht_std_cx_dc.sv",
+  "sv/jpeg_dht_std_y_ac.sv",
+  "sv/jpeg_dht_std_y_dc.sv",
+  "sv/jpeg_dht.sv",
+  "sv/jpeg_dqt.sv",
+  "sv/jpeg_idct_fifo.sv",
+  "sv/jpeg_idct_ram_dp.sv",
+  "sv/jpeg_idct_ram.sv",
+  "sv/jpeg_idct_transpose_ram.sv",
+  "sv/jpeg_idct_transpose.sv",
+  "sv/jpeg_idct_x.sv",
+  "sv/jpeg_idct_y.sv",
+  "sv/jpeg_idct.sv",
+  "sv/jpeg_input.sv",
+  "sv/jpeg_mcu_id.sv",
+  "sv/jpeg_mcu_proc.sv",
+  "sv/jpeg_output_cx_ram.sv",
+  "sv/jpeg_output_fifo.sv",
+  "sv/jpeg_output_y_ram.sv",
+  "sv/jpeg_output.sv",
+ # "sv/jpeg_input_coverage.sv",
+
+
+  
+  
+
+  # TODO: Add any additional BSG files needed
+  "${bsg_root}/bsg_misc/bsg_defines.v",
+  "${bsg_root}/bsg_misc/bsg_dff.v",
+  "${bsg_root}/bsg_misc/bsg_dff_en.v",
+  "${bsg_root}/bsg_misc/bsg_dff_en_bypass.v",
+  "${bsg_root}/bsg_mem/bsg_mem_1rw_sync.v",
+  "${bsg_root}/bsg_mem/bsg_mem_1rw_sync_synth.v",
+ 
+
+
+
+
+
+
+  
+
+]
+synthesis.inputs.input_files_meta: [append, subst]
+
+# Add synthesis input files to simulation inputs
+# (Only for RTL sim)
+sim.inputs.input_files: synthesis.inputs.input_files
+sim.inputs.input_files_meta: [crossref, subst]
