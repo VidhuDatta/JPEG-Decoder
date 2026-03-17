@@ -1,5 +1,6 @@
 from PIL import Image
 import argparse
+import os
 
 def get_rgb_from_jpeg(jpeg_filepath):
     """
@@ -91,11 +92,65 @@ def generate_output_trace(jpeg_filepath, output_trace_filepath):
         
         print(f"Generated expected RGB output trace: {output_trace_filepath}")
 
+def generate_output_traces_from_folder(input_folder, output_folder):
+    """
+    Processes all JPEG files in input_folder and generates one output trace file
+    per image, saved in output_folder.
+    """
+    if not os.path.isdir(input_folder):
+        print(f"Error: The folder '{input_folder}' does not exist or is not a directory.")
+        return
+
+    jpeg_extensions = ('.jpg', '.jpeg', '.JPG', '.JPEG')
+    jpeg_files = [
+        f for f in os.listdir(input_folder)
+        if os.path.isfile(os.path.join(input_folder, f)) and f.endswith(jpeg_extensions)
+    ]
+
+    if not jpeg_files:
+        print(f"No JPEG files found in '{input_folder}'.")
+        return
+
+    os.makedirs(output_folder, exist_ok=True)
+    print(f"Found {len(jpeg_files)} JPEG file(s) in '{input_folder}'. Output traces will be saved to '{output_folder}'.")
+
+    for jpeg_file in sorted(jpeg_files):
+        jpeg_path = os.path.join(input_folder, jpeg_file)
+        base_name = os.path.splitext(jpeg_file)[0]
+        output_trace_path = os.path.join(output_folder, base_name + ".tr")
+        generate_output_trace(jpeg_path, output_trace_path)
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Generate expected RGB output traces for a JPEG decoder.')
-    parser.add_argument('--input_jpeg', '-i', required=True, help='Path to the input JPEG file (e.g., cat.jpg)')
-    parser.add_argument('--output_trace', '-o', required=True, help='Path for the generated output trace file (e.g., trace_output_rgb.tr)')
-    
+    parser = argparse.ArgumentParser(
+        description='Generate expected RGB output traces for a JPEG decoder.',
+        epilog="""
+Examples:
+  # Process a single JPEG file:
+  python generate_jpeg_output_trace.py --input_jpeg cat.jpg --output_trace cat_trace.tr
+
+  # Process all JPEG files in a folder:
+  python generate_jpeg_output_trace.py --input_folder images/ --output_folder traces/
+"""
+    )
+
+    input_group = parser.add_mutually_exclusive_group(required=True)
+    input_group.add_argument('--input_jpeg', '-i', help='Path to a single input JPEG file (e.g., cat.jpg)')
+    input_group.add_argument('--input_folder', '-f', help='Path to a folder containing JPEG files to process in batch')
+
+    parser.add_argument('--output_trace', '-o', help='Path for the generated output trace file (required when using --input_jpeg)')
+    parser.add_argument('--output_folder', '-d', help='Path to the output folder for generated trace files (used with --input_folder; defaults to <input_folder>_traces)')
+
     args = parser.parse_args()
-    
-    generate_output_trace(args.input_jpeg, args.output_trace)
+
+    if args.input_jpeg:
+        if not args.output_trace:
+            base_name = os.path.splitext(args.input_jpeg)[0]
+            args.output_trace = base_name + ".tr"
+            print(f"No --output_trace specified. Defaulting to '{args.output_trace}'.")
+        generate_output_trace(args.input_jpeg, args.output_trace)
+    else:
+        output_folder = args.output_folder
+        if not output_folder:
+            output_folder = args.input_folder.rstrip('/\\') + "_traces"
+            print(f"No --output_folder specified. Defaulting to '{output_folder}'.")
+        generate_output_traces_from_folder(args.input_folder, output_folder)
