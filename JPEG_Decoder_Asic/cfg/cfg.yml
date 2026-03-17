@@ -1,0 +1,56 @@
+# cfg.yml - Main hammer config file
+
+# Set top level for synthesis
+synthesis.inputs.top_module: "jpeg_core"
+
+
+# Don't synthesize these gate-level netlist modules
+synthesis.inputs.preserve_modules: []
+
+# Turn-off clock gating, issue with sky130 latch model in some clock gate cells
+# when coming out of x leading to failed simulations.
+synthesis.clock_gating_mode: ""
+
+
+# Custom SDC constraints
+
+vlsi.inputs:
+  # You can add SDC constraints directly here (list of strings)
+  custom_sdc_constraints: []
+  
+  # Additional SDC files to read
+  custom_sdc_files:
+    - "../../../ee477-hammer-cad/tcl/bsg_tag_timing.tcl"
+    - "../../../ee477-hammer-cad/tcl/bsg_chip/bsg_chip_timing_constraint.tcl"
+    - "constraints.tcl"
+  custom_sdc_files_meta: prependlocal # Prepend path of this config file!
+
+pin.assignments: [
+  # Clock/Control - Top side (shortest routes to clock tree)
+  {pins: "clk_i", layers: ["METAL3"], side: "left"},
+  {pins: "rst_i", layers: ["METAL3"], side: "left"},
+  {pins: "idle_o", layers: ["METAL2"], side: "left"},
+  
+  # Input Interface - Left side (data flow direction)
+  {pins: "inport_*", layers: ["METAL2"], side: "left"},
+  
+  # Output Interface - Right side (data flow direction)  
+  {pins: "outport_*", layers: ["METAL2"], side: "right"},
+]
+
+sram_generator.fakeram.pinPitch_nm: 300
+vlsi.inputs.sram_parameters: [
+    {name: "fakeram_d1024_w8", family: "1rw", depth: 1024, width: 8, mask: True, mux: 1, vt: ""},
+    {name: "fakeram_d256_w8", family: "1rw", depth: 256, width: 8, mask: False, mux: 1, vt: ""},
+  ]
+
+# Placement Constraints
+vlsi.inputs.placement_constraints:
+  - path: "jpeg_core" # (this name isn't actually checked...)
+    type: toplevel
+    # Define chip dimensions
+    width: 3000
+    height: 3000
+    x: 0
+    y: 0
+    margins: {left: 0, right: 0, top: 0, bottom: 0}
